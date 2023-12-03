@@ -19,6 +19,7 @@ func main() {
 
 	gameCounter := 1
 	sum := 0
+	sumOfPowers := 0
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -27,6 +28,7 @@ func main() {
 			sum += gameCounter
 		}
 
+		sumOfPowers += gamePossibleFewestCubes(scanner.Text())
 		gameCounter += 1
 	}
 
@@ -34,7 +36,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(sum)
+	fmt.Println("Part one:", sum)
+	fmt.Println("Part two:", sumOfPowers)
 }
 
 // Part one
@@ -84,4 +87,50 @@ func gamePossible(line string) bool {
 
 	}
 	return true
+}
+
+// Part two
+func gamePossibleFewestCubes(line string) int {
+
+	// Remove metadata about games
+	line = line[strings.IndexByte(line, ':')+2:]
+
+	// Extract each game into an array
+	sets := strings.Split(line, ";")
+
+	regexPattern := `(\d+) (red|green|blue)`
+	re := regexp.MustCompile(regexPattern)
+
+	maxRedInGame := 1
+	maxGreenInGame := 1
+	maxBlueInGame := 1
+
+	for _, set := range sets {
+
+		cubeCount := map[string]int{
+			"red":   0,
+			"green": 0,
+			"blue":  0,
+		}
+
+		matches := re.FindAllStringSubmatch(set, -1)
+		for _, match := range matches {
+			count := match[1]
+			color := match[2]
+			cubeCount[color], _ = strconv.Atoi(count)
+
+			if cubeCount["red"] > maxRedInGame {
+				maxRedInGame = cubeCount["red"]
+			}
+
+			if cubeCount["green"] > maxGreenInGame {
+				maxGreenInGame = cubeCount["green"]
+			}
+
+			if cubeCount["blue"] > maxBlueInGame {
+				maxBlueInGame = cubeCount["blue"]
+			}
+		}
+	}
+	return maxRedInGame * maxGreenInGame * maxBlueInGame
 }
